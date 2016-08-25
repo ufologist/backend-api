@@ -59,6 +59,10 @@ var backendApi = new BackendApi({
         url: '/api/message'
     }
 });
+// 设置统一的错误处理
+backendApi.setError(function() {
+    console.error('backendApi error', arguments);
+});
 
 // 调用后端接口
 backendApi.invoke('getMessageList').then(function(result) {

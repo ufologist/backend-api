@@ -32,25 +32,52 @@
  * 2. 方便知道前后端都使用了哪些接口
  * 3. 方便扩展功能, 例如添加缓存层
  * 
- * @param apiConfig {object}
+ * @param apiConfig {object} 所有后端接口的配置
  */
 function BackendApi(apiConfig) {
     this.apiConfig = apiConfig;
+    // 统一的错误处理
+    this.error = null;
     // this.middlewares = [];
 }
 BackendApi.prototype = {
     constructor: BackendApi,
+    /**
+     * (覆盖)配置所有的后端接口
+     * 
+     * @param apiConfig {object}
+     */
     setApiConfig: function(apiConfig) {
         this.apiConfig = apiConfig;
     },
+    /**
+     * 配置一个后端接口
+     * 
+     * @param name {string}
+     * @param config {object}
+     */
     setApi: function(name, config) {
         if (this.getApi(name)) {
             console.warn('覆盖了 API 配置:', name);
         }
         this.apiConfig[name] = config;
     },
+    /**
+     * 获取一个后端接口的配置
+     * 
+     * @param name {string}
+     * @returns 后端接口的配置
+     */
     getApi: function(name) {
         return this.apiConfig[name];
+    },
+    /**
+     * 设置统一的错误处理函数
+     * 
+     * @param error {Function}
+     */
+    setError: function(error) {
+        this.error = error;
     },
     /**
      * 调用后端接口
@@ -59,7 +86,9 @@ BackendApi.prototype = {
      * @param options {object} ajax options
      */
     invoke: function(apiName, options) {
-        var _options = options || {};
+        var _options = $.extend({
+            error: this.error
+        }, options);
 
         var api = this.getApi(apiName);
         if (!api) {
