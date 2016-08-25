@@ -1,7 +1,13 @@
+/**
+ * 一个用于与后端交互的数据层, 即统一地调用后端接口.
+ * 
+ * @author https://github.com/ufologist/backend-api
+ * @licence MIT
+ */
 (function(global, $) {
 
 /**
- * 一个用于与后端交互的数据层, 即统一地调用后端接口.
+ * 后端接口
  * 
  * @param apiConfig {object} 所有后端接口的配置
  */
@@ -88,4 +94,4 @@ BackendApi.prototype = {
 
 global.BackendApi = BackendApi;
 
-})(window, window.jQuery || window.Zepto);
+})(window, window.jQuery || window.Zepto); // 依赖 jQuery 或者 Zepto 提供底层的 ajax
