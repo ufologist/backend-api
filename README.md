@@ -70,9 +70,11 @@ backendApi.setError(function() {
 backendApi.invoke('getMessageList').then(function(result) {
     console.log(result);
 });
-backendApi.invoke('createMessage', {
-    title: 'msg title',
-    content: 'msg content'
+backendApi.invoke('createMessage', { // jQuery ajax options
+    data: {
+        title: 'msg title',
+        content: 'msg content'
+    }
 }).then(function(result) {
     console.log(result);
 });
