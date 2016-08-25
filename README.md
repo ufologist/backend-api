@@ -46,7 +46,7 @@ $(function() {
 ```html
 <!-- 依赖 jQuery ajax -->
 <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
-<script src=""></script>
+<script src="http://rawgit.com/ufologist/backend-api/master/backend-api.js"></script>
 <script>
 // 配置后端接口
 var backendApi = new BackendApi({
@@ -93,5 +93,18 @@ backendApi.invoke('createMessage', {
   >
   > AmplifyJS solves the following problems:
   > * Ajax Request Management - `amplify.request` provides a clean and elegant request abstraction for all types of data, even allowing for transformation prior to consumption.
+  >
+  >   ```javascript
+  >   amplify.request.define('ajaxExample1', 'ajax', {
+  >       url: '/myApiUrl',
+  >       dataType: 'json',
+  >       type: 'GET'
+  >   });
+  >   
+  >   amplify.request('ajaxExample1', function(result) {
+  >       console.log(result);
+  >   });
+  >   ```
+  >
   > * Client Side Component Communication - `amplify.publish/subscribe` provides a clean, performant API for component to component communication.
   > * Client Side Browser & Mobile Device Storage - `amplify.store` takes the confusion out of HTML5 localStorage. It doesn't get simpler than using amplify.store(key, data)! It even works flawlessly on mobile devices.
