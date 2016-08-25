@@ -92,7 +92,9 @@ backendApi.invoke('createMessage', {
   > Request | Store | Pub/Sub
   >
   > AmplifyJS solves the following problems:
-  > * Ajax Request Management - `amplify.request` provides a clean and elegant request abstraction for all types of data, even allowing for transformation prior to consumption.
+  > * **Ajax Request Management**
+  > 
+  >   `amplify.request` provides a clean and elegant request abstraction for all types of data, even allowing for transformation prior to consumption.
   >
   >   ```javascript
   >   amplify.request.define('ajaxExample1', 'ajax', {
@@ -106,5 +108,10 @@ backendApi.invoke('createMessage', {
   >   });
   >   ```
   >
-  > * Client Side Component Communication - `amplify.publish/subscribe` provides a clean, performant API for component to component communication.
-  > * Client Side Browser & Mobile Device Storage - `amplify.store` takes the confusion out of HTML5 localStorage. It doesn't get simpler than using amplify.store(key, data)! It even works flawlessly on mobile devices.
+  > * **Client Side Component Communication**
+  >
+  >   `amplify.publish/subscribe` provides a clean, performant API for component to component communication.
+  >
+  > * **Client Side Browser & Mobile Device Storage**
+  >
+  >   `amplify.store` takes the confusion out of HTML5 localStorage. It doesn't get simpler than using amplify.store(key, data)! It even works flawlessly on mobile devices.
