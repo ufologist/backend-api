@@ -1,8 +1,11 @@
 /**
+ * backend-api
+ * 
  * 一个用于与后端交互的数据层, 即统一地调用后端接口.
  * 
+ * @version 1.0.0
  * @author https://github.com/ufologist/backend-api
- * @licence MIT
+ * @licence MIT (c) 2016 Sun
  */
 (function(global, $) {
 
