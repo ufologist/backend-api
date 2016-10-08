@@ -1,5 +1,14 @@
 # backend-api
 
+[![version][version]][source-url] [![changelog][changelog-image]][changelog-url] [![license][license-image]][license-url]
+
+[version]: https://img.shields.io/badge/v-1.1.0-blue.svg?style=flat-square
+[source-url]: https://github.com/ufologist/backend-api/blob/master/backend-api.js
+[license-image]: https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square
+[license-url]: https://github.com/ufologist/backend-api/blob/master/LICENSE
+[changelog-image]: https://img.shields.io/badge/CHANGE-LOG-blue.svg?style=flat-square
+[changelog-url]: https://github.com/ufologist/backend-api/blob/master/CHANGELOG.md
+
 一个用于与后端交互的数据层, 即统一地调用后端接口.
 
 ## 为什么需要统一调用后端接口
