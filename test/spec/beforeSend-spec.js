@@ -1,24 +1,14 @@
 describe('beforeSend', function() {
     var backendApi;
-    var businessSuccessResult;
 
     beforeEach(function() {
         backendApi = new BackendApi(apiConfig);
-
-        businessSuccessResult = {
-            "status": 0,
-            "data": {
-                "user": {
-                    "id": 1
-                }
-            }
-        };
     });
 
     function successCallback(result, textStatus, xhr) {
         expect(this.url).toBe('fixtures/business-success.json');
         expect(result).toEqual(businessSuccessResult);
-        expect(textStatus).toBe(undefined);
+        expect(textStatus).toBe('success');
         expect(xhr).toBe(undefined);
     }
 
@@ -36,6 +26,23 @@ describe('beforeSend', function() {
         }
 
         return processedResult;
+    }
+
+    function successProcessor(result, textStatus, xhr) {
+        var _result = JSON.parse(JSON.stringify(result));
+        _result.data.user.name = '我要修改下接口的数据';
+
+        var processedResult = {
+            success: true,
+            result: _result
+        };
+        return processedResult;
+    }
+    function afterSuccessProcessorSuccessCallback(result, textStatus, xhr) {
+        expect(this.url).toBe('fixtures/business-success.json');
+        expect(result.data.user.name).toBe('我要修改下接口的数据');
+        expect(textStatus).toBe('success');
+        expect(xhr).toBe(undefined);
     }
 
     it('处理 ajaxOptions', function(done) {
@@ -75,49 +82,31 @@ describe('beforeSend', function() {
         });
     });
 
-    it('beforeSend and successProcessor success', function(done) {
+    it('and successProcessor success', function(done) {
         backendApi.setBeforeSend(beforeSend);
-        backendApi.setSuccessProcessor(function(result) {
-            var _result = JSON.parse(JSON.stringify(result));
-            _result.data.user.name = '我要修改下接口的数据';
-
-            var processedResult = {
-                success: true,
-                result: _result
-            };
-            return processedResult;
-        });
+        backendApi.setSuccessProcessor(successProcessor);
 
         backendApi.invoke('businessSuccess', {
             data: {
-                // cache: true
+                cache: true
             },
             success: function(result, textStatus, xhr) {
-                expect(result.data.user.name).toBe('我要修改下接口的数据');
+                afterSuccessProcessorSuccessCallback.apply(this, arguments);
                 done();
             }
         });
     });
 
-    it('beforeSend and successProcessor promise', function(done) {
+    it('and successProcessor promise', function(done) {
         backendApi.setBeforeSend(beforeSend);
-        backendApi.setSuccessProcessor(function(result) {
-            var _result = JSON.parse(JSON.stringify(result));
-            _result.data.user.name = '我要修改下接口的数据';
+        backendApi.setSuccessProcessor(successProcessor);
 
-            var processedResult = {
-                success: true,
-                result: _result
-            };
-            return processedResult;
-        });
-
-        backendApi.invoke('businessError', {
+        backendApi.invoke('businessSuccess', {
             data: {
                 cache: true
             }
         }).done(function(result, textStatus, xhr) {
-            expect(result.data.user.name).toBe('我要修改下接口的数据');
+            afterSuccessProcessorSuccessCallback.apply(this, arguments);
             done();
         });
     });

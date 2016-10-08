@@ -1,25 +1,8 @@
 describe('invoke', function() {
     var backendApi;
-    var businessSuccessResult;
-    var businessErrorResult;
 
     beforeEach(function() {
         backendApi = new BackendApi(apiConfig);
-
-        businessSuccessResult = {
-            "status": 0,
-            "data": {
-                "user": {
-                    "id": 1
-                }
-            }
-        };
-        businessErrorResult = {
-            "status": 1,
-            "statusInfo": {
-                "message": "param error"
-            }
-        };
     });
 
     function successCallback(result, textStatus, xhr) {

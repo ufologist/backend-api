@@ -60,8 +60,8 @@ function useSuccessProcessorInCallback(ajaxOptions, successProcessor) {
 /**
  * 在 promise 模式中使用 successProcessor
  */
-function useSuccessProcessorInPromise(jqxhr, successProcessor) {
-    promise = jqxhr.then(function(result, textStatus, xhr) {
+function useSuccessProcessorInPromise(promise, successProcessor) {
+    return promise.then(function(result, textStatus, xhr) {
         var dfd = $.Deferred();
 
         if (successProcessor) {
@@ -79,8 +79,6 @@ function useSuccessProcessorInPromise(jqxhr, successProcessor) {
 
         return dfd.promise();
     });
-
-    return promise;
 }
 
 /**
@@ -98,19 +96,26 @@ function useBeforeSend(apiName, api, ajaxOptions) {
         // 不发送请求的情况, 例如直接从缓存中找到数据了, 就直接返回缓存数据
         if (!processedResult.allowSend) {
             if (typeof processedResult.result != 'undefined') {
+                var textStatus = 'success';
+
                 // 如果有返回结果则直接调用 success callback
+                // 此时的 success callback 已经包装了 successProcessor 的逻辑
                 if (ajaxOptions.success) {
                     // 通过 setTimeout 延时确保 ajax 回调始终是异步执行的
                     setTimeout(function() {
-                        ajaxOptions.success.call(ajaxOptions, processedResult.result);
+                        ajaxOptions.success.call(ajaxOptions, processedResult.result, textStatus);
                     });
                 }
 
                 // 对于支持 promise 模式的就返回一个 promise
                 if ($.Deferred) {
-                    beforeSendResult.result = $.Deferred()
-                                               .resolveWith(ajaxOptions, [processedResult.result])
-                                               .promise();
+                    // 直接返回结果
+                    var resultPromise = $.Deferred()
+                                         .resolveWith(ajaxOptions, [processedResult.result, textStatus])
+                                         .promise();
+
+                    // 返回结果时包装一下 successProcessor 的逻辑
+                    beforeSendResult.result = useSuccessProcessorInPromise(resultPromise, this.successProcessor);
                 } else { // TODO 需要确保返回的数据对象吗?
                     beforeSendResult.result = new XMLHttpRequest();
                 }
@@ -310,6 +315,7 @@ BackendApi.prototype = {
         return ajaxReturn;
     }
 };
+
 BackendApi.BUSINESS_ERROR = 'businessError';
 
 global.BackendApi = BackendApi;

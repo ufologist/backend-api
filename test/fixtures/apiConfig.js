@@ -12,3 +12,19 @@ var apiConfig = {
         url: 'fixtures/business-error.json'
     }
 };
+
+var businessSuccessResult = {
+    "status": 0,
+    "data": {
+        "user": {
+            "id": 1
+        }
+    }
+};
+
+var businessErrorResult = {
+    "status": 1,
+    "statusInfo": {
+        "message": "param error"
+    }
+};
