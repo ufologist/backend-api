@@ -95,38 +95,27 @@ function useBeforeSend(apiName, api, ajaxOptions) {
 
         // 不发送请求的情况, 例如直接从缓存中找到数据了, 就直接返回缓存数据
         if (!processedResult.allowSend) {
-            if (typeof processedResult.result != 'undefined') {
-                var textStatus = 'success';
+            var textStatus = 'success';
 
-                // 如果有返回结果则直接调用 success callback
-                // 此时的 success callback 已经包装了 successProcessor 的逻辑
-                if (ajaxOptions.success) {
-                    // 通过 setTimeout 延时确保 ajax 回调始终是异步执行的
-                    setTimeout(function() {
-                        ajaxOptions.success.call(ajaxOptions, processedResult.result, textStatus);
-                    });
-                }
-
-                // 对于支持 promise 模式的就返回一个 promise
-                if ($.Deferred) {
-                    // 直接返回结果
-                    var resultPromise = $.Deferred()
-                                         .resolveWith(ajaxOptions, [processedResult.result, textStatus])
-                                         .promise();
-
-                    // 返回结果时包装一下 successProcessor 的逻辑
-                    beforeSendResult.result = useSuccessProcessorInPromise(resultPromise, this.successProcessor);
-                } else { // TODO 需要确保返回的数据对象吗?
-                    beforeSendResult.result = new XMLHttpRequest();
-                }
+            // 如果有返回结果则直接调用 success callback
+            // 此时的 success callback 已经包装了 successProcessor 的逻辑
+            if (ajaxOptions.success) {
+                // 确保 ajax 回调始终是异步执行的
+                setTimeout(function() {
+                    ajaxOptions.success.call(ajaxOptions, processedResult.result, textStatus);
+                });
             }
-            // TODO 存在这样一种情况: 我不想发送 ajax, 也不返回数据?
-            // 现在的情况是当 allowSend: false 时, result 应该是有值的, 否则代码就可能会出错
-            // 例如回调的模式还好, 没有依赖返回值, 如果是 promise 模式
-            // 那么代码就有问题了
-            // backendApi.invoke('test').done();
-            // allowSend 为 false 的情况下, invoke 返回值为 null
-            // TODO 如果 beforeSend 没有返回 result, 那应该返回什么东西呢?
+
+            // 对于支持 promise 模式的就返回一个 promise
+            if ($.Deferred) {
+                // 直接返回结果
+                var resultPromise = $.Deferred()
+                                     .resolveWith(ajaxOptions, [processedResult.result, textStatus])
+                                     .promise();
+
+                // 返回结果时包装一下 successProcessor 的逻辑
+                beforeSendResult.result = useSuccessProcessorInPromise(resultPromise, this.successProcessor);
+            }
         }
     }
 
@@ -194,9 +183,10 @@ BackendApi.prototype = {
      * @param error {Function} (jqXHR jqXHR, String error, String textStatus)
      * 
      * 例如
-     * // error 为 BUSINESS_ERROR 时属于业务错误, 而非通信层的错误
-     * function(xhr, error, textStatus) {
-     *    console.log(xhr, error, textStatus);
+     * // 当 error 为 BUSINESS_ERROR 时属于业务错误, 而非通信层的错误
+     * // 当 error 为 BUSINESS_ERROR 时, textStatus 参数代表的是 ajax 返回的结果
+     * function(xhr, error, textStatusOrResult) {
+     *    console.log(xhr, error, textStatusOrResult);
      * }
      */
     setError: function(error) {
