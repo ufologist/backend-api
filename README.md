@@ -118,10 +118,16 @@ backendApi.invoke('createMessage', { // support full jQuery ajax options
 backendApi.invoke('getUserAgent').then(function(result) {
     console.log('getUserAgent', result);
 });
-
-// 更多示例请参考 test/spec 中的测试用例
 </script>
 ```
+
+更多示例请参考测试用例
+
+## 测试用例
+
+[运行测试用例](http://rawgit.com/ufologist/backend-api/master/test/index.html)
+
+![test-snapshot](http://rawgit.com/ufologist/backend-api/master/test/test-snapshot.png)
 
 ## 参考
 

@@ -12,7 +12,10 @@
 
     <script src="../backend-api.js"></script>
 
-    <script>jasmine.DEFAULT_TIMEOUT_INTERVAL = 200000;</script>
+    <script>
+    // 由于通过 rawgit.com 在线上运行测试用例速度好慢, 只好加长超时时间
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30 * 1000;
+    </script>
     <script src="fixtures/apiConfig.js"></script>
     <script src="spec/apiConfig-spec.js"></script>
     <script src="spec/invoke-spec.js"></script>
