@@ -3,7 +3,7 @@
  * 
  * 一个用于与后端交互的数据层, 即统一地调用后端接口.
  * 
- * @version 1.1.0 2016-10-8
+ * @version 1.1.0 2016-10-10
  * @author https://github.com/ufologist/backend-api
  * @licence MIT (c) 2016 Sun
  */
@@ -60,7 +60,7 @@ function useSuccessProcessorInCallback(ajaxOptions, successProcessor) {
 /**
  * 在 promise 模式中使用 successProcessor
  */
-function useSuccessProcessorInPromise(promise, successProcessor) {
+function useSuccessProcessorInPromise(promise, successProcessor, errorCallback) {
     return promise.then(function(result, textStatus, xhr) {
         var dfd = $.Deferred();
 
@@ -71,6 +71,8 @@ function useSuccessProcessorInPromise(promise, successProcessor) {
             if (processedResult.success) {
                 dfd.resolveWith(this, [_result, textStatus, xhr]);
             } else {
+                // 当 successProcessor 处理的结果是 false 时, 执行 errorCallback
+                errorCallback && errorCallback.apply(this, [xhr, BackendApi.BUSINESS_ERROR, _result]);
                 dfd.rejectWith(this, [xhr, BackendApi.BUSINESS_ERROR, _result]);
             }
         } else {
@@ -97,24 +99,22 @@ function useBeforeSend(apiName, api, ajaxOptions) {
         if (!processedResult.allowSend) {
             var textStatus = 'success';
 
-            // 如果有返回结果则直接调用 success callback
-            // 此时的 success callback 已经包装了 successProcessor 的逻辑
-            if (ajaxOptions.success) {
-                // 确保 ajax 回调始终是异步执行的
-                setTimeout(function() {
-                    ajaxOptions.success.call(ajaxOptions, processedResult.result, textStatus);
-                });
-            }
-
-            // 对于支持 promise 模式的就返回一个 promise
-            if ($.Deferred) {
+            // 对于支持 promise 方式的就返回一个 promise
+            if (this.asyncStyle) {
                 // 直接返回结果
                 var resultPromise = $.Deferred()
                                      .resolveWith(ajaxOptions, [processedResult.result, textStatus])
                                      .promise();
 
                 // 返回结果时包装一下 successProcessor 的逻辑
-                beforeSendResult.result = useSuccessProcessorInPromise(resultPromise, this.successProcessor);
+                beforeSendResult.result = useSuccessProcessorInPromise(resultPromise, this.successProcessor, ajaxOptions.error);
+            } else if (ajaxOptions.success) {
+                // 如果有返回结果则直接调用 success callback
+                // 此时的 success callback 已经包装了 successProcessor 的逻辑
+                // 确保 ajax 回调始终是异步执行的
+                setTimeout(function() {
+                    ajaxOptions.success.call(ajaxOptions, processedResult.result, textStatus);
+                });
             }
         }
     }
@@ -136,12 +136,31 @@ function BackendApi(apiConfig) {
     // 统一的错误处理
     this.error = null;
 
+    // 处理异步操作的方式
+    this.asyncStyle = !!$.Deferred;
+
     // TODO 是否可以考虑实现像 express 一样的 middleware 机制?
     // 例如通过中间件机制实现缓存
     // this.middlewares.push(middleware);
 }
 BackendApi.prototype = {
     constructor: BackendApi,
+    /**
+     * 改变处理异步操作的方式
+     * 
+     * 只能使用 callback 方式和 promise 方式其中的一种,
+     * 默认根据是否支持 $.Deferred 来判断使用 promise 方式还是 callback 方式.
+     * 
+     * @param asyncStyle {string} callback 或者 promise
+     */
+    setAsyncStyle: function(asyncStyle) {
+        if (asyncStyle == 'callback') {
+            this.asyncStyle = false;
+        } else {
+            // 可能想设置成 promise 方式, 但本身又不支持 promise 功能
+            this.asyncStyle = !!$.Deferred;
+        }
+    },
     /**
      * (覆盖)配置所有的后端接口
      * 
@@ -172,21 +191,26 @@ BackendApi.prototype = {
         return this.apiConfig[name];
     },
     /**
-     * 设置统一的通信错误处理函数(通信错误指 HTTP 层的错误客户端错误, 例如下面提到的 error)
-     * 
-     * if there is an error (timeout, parse error, or status code not in HTTP 2xx)
-     * 
-     * Possible values for the second argument (besides null) are "timeout", "error", "abort", and "parsererror"
-     * 
-     * When an HTTP error occurs, errorThrown receives the textual portion of the HTTP status, such as "Not Found" or "Internal Server Error." As of jQuery 1.5, the error setting can accept an array of functions. Each function will be called in turn. Note: This handler is not called for cross-domain script and cross-domain JSONP requests.
+     * 设置统一的错误处理函数
+     * - 通信错误指 HTTP 层的错误客户端错误
+     * - 业务错误指通过 successProcessor 处理不通过时的错误
      * 
      * @param error {Function} (jqXHR jqXHR, String error, String textStatus)
+     * 
+     * If there is an error (timeout, parse error, or status code not in HTTP 2xx),
+     * possible values for the second argument (besides null)
+     * are "timeout", "error", "abort", and "parsererror".
+     * When an HTTP error occurs, textStatus receives the textual portion of the HTTP status,
+     * such as "Not Found" or "Internal Server Error."
+     * 
+     * Note: This handler is not called for cross-domain script and cross-domain JSONP requests.
      * 
      * 例如
      * // 当 error 为 BUSINESS_ERROR 时属于业务错误, 而非通信层的错误
      * // 当 error 为 BUSINESS_ERROR 时, textStatus 参数代表的是 ajax 返回的结果
      * function(xhr, error, textStatusOrResult) {
-     *    console.log(xhr, error, textStatusOrResult);
+     *    // 关于 this 的使用, 与 successProcessor 一样
+     *    console.log(this, xhr, error, textStatusOrResult);
      * }
      */
     setError: function(error) {
@@ -208,7 +232,7 @@ BackendApi.prototype = {
      * 现在通过 successProcessor 机制, 就可以统一解密了, 对调用接口者来说, 完全感知不到接口是加密的,
      * 很好地屏蔽了底层的实现.
      * 
-     * @param error {Function} (result, textStatus, xhr)
+     * @param successProcessor {Function} (result, textStatus, xhr)
      * 
      * successProcessor 方法的参数与一般的 success callback 一致,
      * 必须返回一个 object, 包含 success, result 这两个字段.
@@ -218,6 +242,13 @@ BackendApi.prototype = {
      * 
      * 例如
      * function(result, textStatus, xhr) {
+     *     // 关于 this 的使用
+     *     // jQuery 和 Zepto ajax 的 context 不同, 因此如果想确保兼容性, 还是不要随意使用
+     *     // * jQuery context default is an object that represents the Ajax settings
+     *     //   used in the call ($.ajaxSettings merged with the settings passed to $.ajax).
+     *     // * Zepto context default: window
+     *     console.log(this, result, textStatus, xhr);
+     * 
      *     var processedResult = {
      *         success: true,
      *         result: result
@@ -236,7 +267,7 @@ BackendApi.prototype = {
      * - 请求参数加密
      * - 检测是否有接口的缓存数据
      * 
-     * @param error {Function} (apiName, api, ajaxOptions)
+     * @param beforeSend {Function} (apiName, api, ajaxOptions)
      * 
      * beforeSend 必须返回一个 object, 包含 allowSend, result 这两个字段.
      * 当 allowSend 为 true 时才会继续发送 ajax 请求调用接口,
@@ -283,9 +314,13 @@ BackendApi.prototype = {
             url: api.url
         }, options);
 
+        // 不管是采用哪种处理异步操作的方式, 都使用回调的方式来处理全局的 error
         setErrorCallback(ajaxOptions, this.error);
-        // 有可能同时存在回调和 promise 两种方式
-        useSuccessProcessorInCallback(ajaxOptions, this.successProcessor);
+
+        // 不可以同时存在 callback 和 promise 两种方式
+        if (!this.asyncStyle) {
+            useSuccessProcessorInCallback(ajaxOptions, this.successProcessor);
+        }
 
         var result = useBeforeSend.call(this, apiName, api, ajaxOptions);
         if (!result.allowSend) {
@@ -295,9 +330,9 @@ BackendApi.prototype = {
         // 推荐使用 Promise 模式
         // 如果是基于 Zepto, 需要添加额外的 deferred 模块; jQuery 1.5+ 默认支持 Promise 模式
         var ajaxReturn;
-        if ($.Deferred) {
+        if (this.asyncStyle) {
             ajaxReturn = $.ajax(ajaxOptions);
-            ajaxReturn = useSuccessProcessorInPromise(ajaxReturn, this.successProcessor);
+            ajaxReturn = useSuccessProcessorInPromise(ajaxReturn, this.successProcessor, ajaxOptions.error);
         } else {
             ajaxReturn = $.ajax(ajaxOptions);
         }
@@ -306,8 +341,9 @@ BackendApi.prototype = {
     }
 };
 
+// 业务错误的名称
 BackendApi.BUSINESS_ERROR = 'businessError';
 
 global.BackendApi = BackendApi;
 
-})(window, window.jQuery || window.Zepto); // 依赖 jQuery 或者 Zepto 提供底层的 ajax
+})(window, window.jQuery || window.Zepto); // 依赖 jQuery 或者 Zepto 提供底层的 ajax 功能
