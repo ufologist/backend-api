@@ -57,7 +57,7 @@ $(function() {
 ## 使用方法
 
 ```html
-<!-- 依赖 jQuery ajax -->
+<!-- 依赖 jQuery 或者 Zepto 提供底层的 ajax 功能, 推荐使用 Promise 模式 -->
 <script src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
 <script src="http://rawgit.com/ufologist/backend-api/master/backend-api.js"></script>
 <script>
@@ -70,25 +70,56 @@ var backendApi = new BackendApi({
     'createMessage': {
         type: 'POST',
         url: '/api/message'
+    },
+    'getUserAgent': {
+        type: 'GET',
+        url: 'http://httpbin.org/user-agent'
     }
 });
+// 设置统一的前置处理
+backendApi.setBeforeSend(function(apiName, api, ajaxOptions) {
+    console.log('1 backendApi beforeSend', arguments);
+
+    var processedResult = {
+        allowSend: true,
+        result: null
+    };
+    return processedResult;
+});
+// 设置统一的成功处理
+backendApi.setSuccessProcessor(function(result, textStatus, xhr) {
+    console.log('2.1 backendApi success', arguments);
+
+    var processedResult = {
+        success: true,
+        result: result
+    };
+    return processedResult;
+});
 // 设置统一的错误处理
-backendApi.setError(function() {
-    console.error('backendApi error', arguments);
+backendApi.setError(function(xhr, error, textStatusOrResult) {
+    console.log('2.2 backendApi error', arguments);
 });
 
 // 调用后端接口
 backendApi.invoke('getMessageList').then(function(result) {
-    console.log(result);
+    console.log('createMessage', result);
 });
-backendApi.invoke('createMessage', { // jQuery ajax options
+
+backendApi.invoke('createMessage', { // support full jQuery ajax options
     data: {
         title: 'msg title',
         content: 'msg content'
     }
 }).then(function(result) {
-    console.log(result);
+    console.log('createMessage', result);
 });
+
+backendApi.invoke('getUserAgent').then(function(result) {
+    console.log('getUserAgent', result);
+});
+
+// 更多示例请参考 test/spec 中的测试用例
 </script>
 ```
 
