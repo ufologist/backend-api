@@ -121,7 +121,7 @@ backendApi.invoke('getUserAgent').then(function(result) {
 </script>
 ```
 
-更多示例请参考测试用例
+更多示例请参考 `test/spec` 目录下面的[测试用例](https://github.com/ufologist/backend-api/tree/master/test/spec)
 
 ## 测试用例
 
