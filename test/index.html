@@ -3,15 +3,16 @@
 <head>
     <meta charset="utf-8">
     <title>backend-api unit tests</title>
-    <link rel="stylesheet" href="http://cdn.bootcss.com/jasmine/2.5.0/jasmine.css">
-    <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.js"></script>
-    <!--<script src="http://cdn.bootcss.com/zepto/1.2.0/zepto.js"></script>-->
-    <script src="http://cdn.bootcss.com/jasmine/2.5.0/jasmine.js"></script>
-    <script src="http://cdn.bootcss.com/jasmine/2.5.0/jasmine-html.js"></script>
-    <script src="http://cdn.bootcss.com/jasmine/2.5.0/boot.js"></script>
+    <link rel="stylesheet" href="//cdn.bootcss.com/jasmine/2.5.0/jasmine.css">
+    <script src="//cdn.bootcss.com/jquery/3.1.1/jquery.js"></script>
+    <!--<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.js"></script>-->
+    <script src="//cdn.bootcss.com/jasmine/2.5.0/jasmine.js"></script>
+    <script src="//cdn.bootcss.com/jasmine/2.5.0/jasmine-html.js"></script>
+    <script src="//cdn.bootcss.com/jasmine/2.5.0/boot.js"></script>
 
     <script src="../backend-api.js"></script>
 
+    <script>jasmine.DEFAULT_TIMEOUT_INTERVAL = 200000;</script>
     <script src="fixtures/apiConfig.js"></script>
     <script src="spec/apiConfig-spec.js"></script>
     <script src="spec/invoke-spec.js"></script>
