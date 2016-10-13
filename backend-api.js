@@ -315,6 +315,7 @@ BackendApi.prototype = {
         }, options);
 
         // 不管是采用哪种处理异步操作的方式, 都使用回调的方式来处理全局的 error
+        // 这样处理是为了 callback 和 promise 方式时都可以简单的运行全局的 error
         setErrorCallback(ajaxOptions, this.error);
 
         // 不可以同时存在 callback 和 promise 两种方式

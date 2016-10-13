@@ -1,6 +1,6 @@
 # backend-api
 
-[![version][version]][source-url] [![changelog][changelog-image]][changelog-url] [![license][license-image]][license-url]
+[![version][version]][source-url] ![size-image][size-image] [![changelog][changelog-image]][changelog-url] [![license][license-image]][license-url]
 
 [version]: https://img.shields.io/badge/v-1.1.0-blue.svg?style=flat-square
 [source-url]: https://github.com/ufologist/backend-api/blob/master/backend-api.js
@@ -8,6 +8,7 @@
 [license-url]: https://github.com/ufologist/backend-api/blob/master/LICENSE
 [changelog-image]: https://img.shields.io/badge/CHANGE-LOG-blue.svg?style=flat-square
 [changelog-url]: https://github.com/ufologist/backend-api/blob/master/CHANGELOG.md
+[size-image]: http://img.badgesize.io/ufologist/backend-api/master/backend-api.js?compression=gzip&style=flat-square
 
 一个用于与后端交互的数据层, 即统一地调用后端接口.
 
