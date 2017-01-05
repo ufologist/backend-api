@@ -148,7 +148,7 @@ backendApi.invoke('getUserAgent').then(function(result) {
   > * 封装统一的请求参数, 例如版本号, 项目名等等
   > * 计算请求参数的签名, 并将所有参数加密(对称加密方式)后再传输
   > * 解密接口返回的数据
-  > * 缓存接口数据(TTL方式, 分 Infinity 永久缓存和时效缓存, 以接口和请求参数为缓存的 key)
+  > * 缓存接口数据(TTL方式, 分 Infinity 永久缓存和时效缓存, 以接口 URL 和请求参数的 hash 值做为缓存的 key)
   > * 统一处理错误码
 
 * [AmplifyJS](https://github.com/mikehostetler/amplify)
