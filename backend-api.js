@@ -220,7 +220,7 @@ BackendApi.prototype = {
      * 设置接口调用成功后预处理接口数据的函数
      * 
      * 一般我们的使用场景有
-     * - 解密接口返回的数据
+     * - 解密接口返回的数据(以前我们可能通过 jQuery.ajaxSetup dataFilter 来实现)
      * - 缓存接口数据
      * - 统一处理错误码(以前我们可能通过 ajaxComplete 全局事件来实现)
      * 
